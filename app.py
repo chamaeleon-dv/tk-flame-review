@@ -92,7 +92,7 @@ class FlameReview(Application):
             self._review_comments = widget.get_comments()
             
             # populate the host to use for the export. Currently hard coded to local
-            info["destinationHost"] = self.engine.get_server_hostname()
+            info["destinationHost"] = self.engine.get_backburner_hostname()
             # set the (temp) location where media is being output prior to upload.
             info["destinationPath"] = self.engine.get_backburner_tmp()
             # pick up the xml export profile from the configuration
