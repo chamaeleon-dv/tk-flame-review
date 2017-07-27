@@ -38,6 +38,7 @@ function build_res {
 echo "building user interfaces..."
 build_ui submit_dialog
 build_ui summary_dialog
+build_ui submit_custom_sequence_name_dialog
 # add any additional .ui files you want converted here!
 
 # build resources

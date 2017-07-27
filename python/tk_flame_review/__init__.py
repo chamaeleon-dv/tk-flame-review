@@ -10,3 +10,4 @@
 
 from .submit_dialog import SubmitDialog
 from .summary_dialog import SummaryDialog
+from .submit_custom_sequence_name_dialog import SubmitCustomSequenceNameDialog

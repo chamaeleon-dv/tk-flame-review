@@ -39,6 +39,9 @@ class FlameReview(Application):
         # track the comments entered by the user
         self._review_comments = ""
         
+        # track shotgun sequence name
+        self._shotgun_sequencename = ""
+        
         # flag to indicate that something was actually submitted
         self._submission_done = False
         
@@ -46,6 +49,7 @@ class FlameReview(Application):
         # when this profile is being triggered 
         callbacks = {}
         callbacks["preCustomExport"] = self.pre_custom_export
+        callbacks["preExportSequence"] = self.pre_sequence_export
         callbacks["preExportAsset"] = self.adjust_path
         callbacks["postExportAsset"] = self.populate_shotgun
         callbacks["postCustomExport"] = self.display_summary
@@ -90,6 +94,7 @@ class FlameReview(Application):
         else:
             # get comments from user
             self._review_comments = widget.get_comments()
+        
             
             # populate the host to use for the export. Currently hard coded to local
             info["destinationHost"] = self.engine.get_backburner_hostname()
@@ -106,6 +111,51 @@ class FlameReview(Application):
         except:
             # ingore any errors. ex: metrics logging not supported
             pass
+
+    def pre_sequence_export(self, session_id, info):
+        """
+        Chamaeleon:
+        Flame hook called before a seqcence export begins. The export will be blocked
+        until this function returns. This can be used to fill information that would
+        have normally been extracted from the export window.
+        
+        The Dialog is moved from "pre_custom_export" because, we needed the SequenceName
+        in the Dialog as an Editable Option
+        
+        :param session_id: String which identifies which export session is being referred to.
+                           This parameter makes it possible to distinguish between different 
+                           export sessions running if this is needed (typically only needed for
+                           expert use cases).
+                           
+        :param info: Dictionary with info about the export. Contains the keys
+                     - destinationHost: Host name where the exported files will be written to.
+                     - destinationPath: Export path root.
+                     - presetPath: Path to the preset used for the export.
+                     - abort: Pass True back to Flame if you want to abort
+                     - abortMessage: Abort message to feed back to client
+                     - sequenceName: Name of Sequence or Clip which should be exported
+                     - shotNames: List of Shots which are in a selected Sequence
+        """
+        from PySide import QtGui, QtCore
+        
+        # clear our flags
+        self._submission_done = False
+        
+        # pop up a UI asking the user for description
+        tk_flame_review = self.import_module("tk_flame_review")
+        (return_code, widget) = self.engine.show_modal("Connect to Sequence in Shotgun:", 
+                                                        self, 
+                                                        tk_flame_review.SubmitCustomSequenceNameDialog, 
+                                                        info['sequenceName'])
+        
+        if return_code == QtGui.QDialog.Rejected:
+            # user pressed cancel
+            info["abort"] = True
+            info["abortMessage"] = "User cancelled the operation."
+        
+        else:
+            self._shotgun_sequencename = widget.get_shotgun_sequencename()
+
 
     def adjust_path(self, session_id, info):
         """
@@ -217,7 +267,7 @@ class FlameReview(Application):
         
         # set up the arguments which we will pass (via backburner) to 
         # the target method which gets executed
-        args = {"info": info, "comments": self._review_comments}
+        args = {"info": info, "comments": self._review_comments, "shotgun_sequencename": self._shotgun_sequencename}
         
         # and populate UI params
         
@@ -237,7 +287,7 @@ class FlameReview(Application):
         # done!
         self._submission_done = True
 
-    def backburner_populate_shotgun(self, info, comments):
+    def backburner_populate_shotgun(self, info, comments, shotgun_sequencename):
         """
         This method is called via backburner and therefore runs in the background.
         It does all the heavy lifting in the app:
@@ -288,7 +338,10 @@ class FlameReview(Application):
         self.log_debug("File size is %s bytes." % os.path.getsize(full_path))
                 
         # ensure that the entity exists in Shotgun
-        entity_name = info["sequenceName"]
+        if len(shotgun_sequencename) > 2:
+            entity_name = shotgun_sequencename
+        else:
+            entity_name = info["sequenceName"]
         entity_type = self.get_setting("shotgun_entity_type")
 
         sg_data = self.shotgun.find_one(entity_type, [["code", "is", entity_name], 
