@@ -39,6 +39,9 @@ class FlameReview(Application):
         # track the comments entered by the user
         self._review_comments = ""
         
+        # track shotgun sequence name
+        self._shotgun_sequencename = ""
+        
         # flag to indicate that something was actually submitted
         self._submission_done = False
         
@@ -90,6 +93,7 @@ class FlameReview(Application):
         else:
             # get comments from user
             self._review_comments = widget.get_comments()
+            self._shotgun_sequencename = widget.get_shotgun_sequencename()
             
             # populate the host to use for the export. Currently hard coded to local
             info["destinationHost"] = self.engine.get_backburner_hostname()
@@ -217,7 +221,7 @@ class FlameReview(Application):
         
         # set up the arguments which we will pass (via backburner) to 
         # the target method which gets executed
-        args = {"info": info, "comments": self._review_comments}
+        args = {"info": info, "comments": self._review_comments, "shotgun_sequencename": self._shotgun_sequencename}
         
         # and populate UI params
         
@@ -237,7 +241,7 @@ class FlameReview(Application):
         # done!
         self._submission_done = True
 
-    def backburner_populate_shotgun(self, info, comments):
+    def backburner_populate_shotgun(self, info, comments, shotgun_sequencename):
         """
         This method is called via backburner and therefore runs in the background.
         It does all the heavy lifting in the app:
@@ -288,7 +292,10 @@ class FlameReview(Application):
         self.log_debug("File size is %s bytes." % os.path.getsize(full_path))
                 
         # ensure that the entity exists in Shotgun
-        entity_name = info["sequenceName"]
+        if len(shotgun_sequencename) > 2:
+            entity_name = shotgun_sequencename
+        else:
+            entity_name = info["sequenceName"]
         entity_type = self.get_setting("shotgun_entity_type")
 
         sg_data = self.shotgun.find_one(entity_type, [["code", "is", entity_name], 

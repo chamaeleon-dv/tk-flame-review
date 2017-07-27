@@ -11,7 +11,7 @@ from tank.platform.qt import QtCore, QtGui
 class Ui_SubmitDialog(object):
     def setupUi(self, SubmitDialog):
         SubmitDialog.setObjectName("SubmitDialog")
-        SubmitDialog.resize(475, 559)
+        SubmitDialog.resize(475, 562)
         self.verticalLayout = QtGui.QVBoxLayout(SubmitDialog)
         self.verticalLayout.setContentsMargins(20, -1, 20, -1)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -20,6 +20,17 @@ class Ui_SubmitDialog(object):
         self.label.setPixmap(QtGui.QPixmap(":/tk-flame-review/ui_splash.png"))
         self.label.setObjectName("label")
         self.verticalLayout.addWidget(self.label)
+        self.label_2 = QtGui.QLabel(SubmitDialog)
+        self.label_2.setObjectName("label_2")
+        self.verticalLayout.addWidget(self.label_2)
+        self.shotgun_sequencename = QtGui.QPlainTextEdit(SubmitDialog)
+        self.shotgun_sequencename.setMinimumSize(QtCore.QSize(0, 25))
+        self.shotgun_sequencename.setMaximumSize(QtCore.QSize(16777215, 25))
+        self.shotgun_sequencename.setObjectName("shotgun_sequencename")
+        self.verticalLayout.addWidget(self.shotgun_sequencename)
+        self.label_3 = QtGui.QLabel(SubmitDialog)
+        self.label_3.setObjectName("label_3")
+        self.verticalLayout.addWidget(self.label_3)
         self.comments = QtGui.QPlainTextEdit(SubmitDialog)
         self.comments.setMinimumSize(QtCore.QSize(300, 100))
         self.comments.setObjectName("comments")
@@ -41,6 +52,8 @@ class Ui_SubmitDialog(object):
 
     def retranslateUi(self, SubmitDialog):
         SubmitDialog.setWindowTitle(QtGui.QApplication.translate("SubmitDialog", "Submit to Shotgun", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_2.setText(QtGui.QApplication.translate("SubmitDialog", "Connect to following Sequence in Shotgun:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_3.setText(QtGui.QApplication.translate("SubmitDialog", "Comment:", None, QtGui.QApplication.UnicodeUTF8))
         self.cancel.setText(QtGui.QApplication.translate("SubmitDialog", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.submit.setText(QtGui.QApplication.translate("SubmitDialog", "Submit to Shotgun", None, QtGui.QApplication.UnicodeUTF8))
 

@@ -51,6 +51,14 @@ class SubmitDialog(QtGui.QWidget):
         """
         return self.ui.comments.toPlainText()
         
+    def get_shotgun_sequencename(self):
+        """
+        Returns the sequencename entered by user to override the Standard sequenz name
+        
+        :returns: shutgun_sequencename as string
+        """
+        return self.ui.shotgun_sequencename.toPlainText()
+
     def _on_submit_clicked(self):
         """
         Called when the 'submit' button is clicked.
