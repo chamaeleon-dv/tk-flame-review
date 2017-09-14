@@ -147,7 +147,13 @@ class FlameReview(Application):
                                                         self, 
                                                         tk_flame_review.SubmitCustomSequenceNameDialog, 
                                                         info['sequenceName'])
-        
+
+
+        if len(widget.get_shotgun_sequencename()) < 3:
+            info["abort"] = True
+            info["abortMessage"] = "Sequenze name, must be more than 2 Character long"
+            return
+            
         if return_code == QtGui.QDialog.Rejected:
             # user pressed cancel
             info["abort"] = True
@@ -202,6 +208,15 @@ class FlameReview(Application):
         
         # ensure each quicktime gets a unique name
         info["resolvedPath"] = "shotgun_%s.mov" % uuid.uuid4().hex
+        # Chamaeleon:
+        # We wanted to use the Sequenze Name for the Filename, so that the user gets a 
+        # correct Filename when he download the original File in a Review Session
+        sequenceName = info["sequenceName"]
+        if len(sequenceName) > 4:
+            valid_chars= '-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+            sequenceName=''.join(c for c in sequenceName if c in valid_chars)
+            info["resolvedPath"] =  "%s.mov" % sequenceName
+            
         # If client override DL_PYTHON_HOOK_PATH env var, it changes the order python hook
         # are triggered and can change the value of the global hook useBackburnerPostExportAsset.
         # "useBackburner" bypass the global option and set the option for that specific export job.
