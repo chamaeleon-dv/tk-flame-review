@@ -354,6 +354,7 @@ class FlameReview(Application):
                 
         # ensure that the entity exists in Shotgun
         if len(shotgun_sequencename) > 2:
+            self.log_debug("Chamaeleon: Found custom SequenceName for Shotgun %s..." % shotgun_sequencename)
             entity_name = shotgun_sequencename
         else:
             entity_name = info["sequenceName"]
